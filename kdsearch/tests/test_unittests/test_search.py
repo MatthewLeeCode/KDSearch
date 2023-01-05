@@ -34,6 +34,13 @@ def test_search(mock_train_cross_validator):
         # in train_cross_validator which is mocked
         return
     
-    results = search(X, y, model_func, hyperparameter_ranges, 0.5, True, 3, 2)
-    assert len(results) == 15
-    assert mock_train_cross_validator.call_count == 29
+    results = search(
+        X=X, 
+        y=y,
+        model_func=model_func,
+        hyperparameter_ranges=hyperparameter_ranges,
+        num_best_branches=4,
+        larger_is_better=True,
+        depth=3)[1]
+    assert len(results) == 9
+    assert mock_train_cross_validator.call_count == 17  # 4 duplicates

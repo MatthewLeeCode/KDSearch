@@ -42,7 +42,6 @@ class KDTree:
         # Create the branches
         for key, value in self.hyperparameter_ranges.items():
             # Create the new hyper parameter ranges
-            
             # Left branch
             new_hyperparameter_ranges = self.hyperparameter_ranges.copy()
             new_hyperparameter_ranges[key] = (value[0], self.hyperparameters[key])

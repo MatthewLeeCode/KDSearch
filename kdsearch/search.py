@@ -38,12 +38,34 @@ def train_cross_validator(
     return np.mean(scores)
 
 
+def remove_duplicates(kdtrees: list[KDTree]) -> list[KDTree]:
+    """ Remove duplicate branches from a list of KDTree objects
+    
+    Unlike Quadtrees, KDTree branches can be identical. We don't want to
+    train the same model twice, so we remove duplicates.
+    
+    Args:
+        kdtrees: The list of KDTree objects
+    Returns:
+        The list of KDTree objects with duplicates removed
+    """
+    hyperparameters = [kdtree.hyperparameters for kdtree in kdtrees]
+    unique_hyperparameters = []
+    unique_kdtrees = []
+    for i, hyperparameter in enumerate(hyperparameters):
+        if hyperparameter not in unique_hyperparameters:
+            unique_hyperparameters.append(hyperparameter)
+            unique_kdtrees.append(kdtrees[i])
+
+    return unique_kdtrees
+
+
 def search(
         X: np.ndarray,
         y: np.ndarray,
         model_func: callable,
         hyperparameter_ranges: dict[tuple],
-        pruning_cutoff: float = 0.5,
+        num_best_branches: int = 4,
         larger_is_better: bool = True,
         n_splits: int = 5,
         depth: int = 10,
@@ -62,7 +84,9 @@ def search(
         y: The labels
         model_func: The function to create the model
         hyperparameter_ranges: The ranges for the hyperparameters
-        pruning_cutoff: The percentage of the best results to keep
+        num_best_branches: The number of branches to keep (if positive) or remove \
+            from the end (if negative). We pass the value into a list slice \
+            [:num_best_branches]. If None, we keep all branches.
         larger_is_better: Whether larger output values of model_func are better
         n_splits: The number of splits for cross validation
         depth: The depth of the KDTree to search
@@ -81,31 +105,33 @@ def search(
         }
     """
     root = KDTree(hyperparameter_ranges)
-    score = train_cross_validator(X, y, model_func, root.hyperparameters, n_splits, seed)
-    results = [{"hyperparameters": root.hyperparameters, "score": score}]
     
-    queue = root.divide()
-    for _ in range(depth + 1):  # +1 because we start with the root
+    results = []
+    queue = [root]
+    for d in range(1, depth + 1):  # Start count at 1
+        # Remove duplicate branches
+        queue = remove_duplicates(queue)
+        
         # We want to store the depth results so we can prune the queue
         depth_results = []
         for branch in queue:
             score = train_cross_validator(X, y, model_func, branch.hyperparameters, n_splits, seed)
-            depth_results.append({"hyperparameters": branch.hyperparameters, "score": score})
+            depth_results.append({"hyperparameters": branch.hyperparameters, "score": score, "depth": d})
             
         # Sort the results and the queue
         combined = zip(depth_results, queue)
         combined = sorted(combined, key=lambda x: x[0]["score"], reverse=larger_is_better)
         
-        # Prune the results
-        cutoff = int(len(depth_results) * pruning_cutoff)
+        if num_best_branches is not None:
+            combined = combined[:num_best_branches]
         
         # Add the best results to the list and divide the branches
         new_queue = []
-        for result, branch in combined[:cutoff]:
+        for result, branch in combined:
             results.append(result)
             new_queue.extend(branch.divide())
             
         # Update the queue
         queue = new_queue
         
-    return results
+    return sorted(results, key=lambda x: x["score"], reverse=False)[0], results
