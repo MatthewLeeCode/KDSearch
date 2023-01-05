@@ -27,3 +27,26 @@ class KDTree:
         self.hyper_parameters = {}
         for key, value in self.hyper_parameter_ranges.items():
             self.hyper_parameters[key] = (value[0] + value[1]) / 2
+
+    def divide(self):
+        """ Divide the KDTree into branches 
+        
+        Each branch will have a different set of the hyperparameter ranges.
+        The number of branches will be len(hyper_parameter_ranges) * 2
+        """
+        assert not self.divided, "KDTree has already been divided"
+
+        self.divided = True
+        
+        # Create the branches
+        for key, value in self.hyper_parameter_ranges.items():
+            # Create the new hyper parameter ranges
+            new_hyper_parameter_ranges = self.hyper_parameter_ranges.copy()
+            # Left branch
+            new_hyper_parameter_ranges[key] = (value[0], self.hyper_parameters[key])
+            self.branches.append(KDTree(new_hyper_parameter_ranges.copy()))
+
+            # Right branch
+            new_hyper_parameter_ranges = self.hyper_parameter_ranges.copy()
+            new_hyper_parameter_ranges[key] = (self.hyper_parameters[key], value[1])
+            self.branches.append(KDTree(new_hyper_parameter_ranges.copy()))
