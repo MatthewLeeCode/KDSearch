@@ -134,4 +134,4 @@ def search(
         # Update the queue
         queue = new_queue
         
-    return sorted(results, key=lambda x: x["score"], reverse=False)[0], results
+    return sorted(results, key=lambda x: x["score"], reverse=larger_is_better)[0], results
