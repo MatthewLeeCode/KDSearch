@@ -1,6 +1,7 @@
 """ Integration test that runs the search function using the KDTree algorithm. """
 import numpy as np
 from sklearn.datasets import load_iris, load_digits
+from sklearn.linear_model import SGDClassifier
 from sklearn import svm
 from kdsearch.search import search
 
@@ -52,6 +53,40 @@ def test_svr_model():
     def model_func(X_train, y_train, X_test, y_test, hyperparameters):
         """ A model function that returns the delta between the expected params and the actual params """
         model = svm.SVR()
+        model.set_params(**hyperparameters)
+        model.fit(X_train, y_train)
+        return model.score(X_test, y_test)
+    
+    results = search(
+        X=X,
+        y=y,
+        model_func=model_func,
+        hyperparameter_ranges=hyperparameter_ranges,
+        num_best_branches=4,
+        larger_is_better=True,
+        n_splits=3,
+        depth=10
+    )
+    
+    print(results)
+    
+    
+def test_sgd_classifier_model():
+    """ Tests the search function using a svr model """
+    data = load_digits()
+    X = data.data
+    y = data.target
+    
+    hyperparameter_ranges = {
+        "alpha": [0.00005, 0.0005],
+        "l1_ratio": [0.05, 0.5],
+        "tol": [0.0005, 0.005],
+        "power_t": [0.1, 0.9]
+    }
+    
+    def model_func(X_train, y_train, X_test, y_test, hyperparameters):
+        """ A model function that returns the delta between the expected params and the actual params """
+        model = SGDClassifier()
         model.set_params(**hyperparameters)
         model.fit(X_train, y_train)
         return model.score(X_test, y_test)
