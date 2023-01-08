@@ -70,7 +70,7 @@ def search(
         larger_is_better: bool = True,
         n_splits: int = 5,
         depth: int = 10,
-        seed: int = 42
+        seed: int = None
     ) -> list[dict, list, KDTree]:
     """ Search for the optimal hyperparameters for a model
     using the KDTree algorithm.
