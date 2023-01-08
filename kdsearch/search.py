@@ -2,6 +2,7 @@
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
 from kdsearch.kdtree import KDTree
+from tqdm import tqdm
 
 
 def train_cross_validator(
@@ -70,7 +71,7 @@ def search(
         n_splits: int = 5,
         depth: int = 10,
         seed: int = 42
-    ) -> list[dict]:
+    ) -> list[dict, list, KDTree]:
     """ Search for the optimal hyperparameters for a model
     using the KDTree algorithm.
     
@@ -92,7 +93,7 @@ def search(
         depth: The depth of the KDTree to search
         seed: The seed for the random number generator
     Returns:
-        A list of the best results found
+        (the best result, A list of the best results found, the root of the KDTree)
     
     Example:
         {
@@ -108,7 +109,7 @@ def search(
     
     results = []
     queue = [root]
-    for d in range(1, depth + 1):  # Start count at 1
+    for d in tqdm(range(1, depth + 1)):  # Start count at 1
         # Remove duplicate branches
         queue = remove_duplicates(queue)
         
@@ -134,4 +135,4 @@ def search(
         # Update the queue
         queue = new_queue
         
-    return sorted(results, key=lambda x: x["score"], reverse=larger_is_better)[0], results
+    return sorted(results, key=lambda x: x["score"], reverse=larger_is_better)[0], results, root
