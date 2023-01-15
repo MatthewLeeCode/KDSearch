@@ -119,6 +119,9 @@ def search(
             score = train_cross_validator(X, y, model_func, branch.hyperparameters, n_splits, seed)
             depth_results.append({"hyperparameters": branch.hyperparameters, "score": score, "depth": d})
             
+        # Add all the results to the list
+        results.extend(depth_results)
+        
         # Sort the results and the queue
         combined = zip(depth_results, queue)
         combined = sorted(combined, key=lambda x: x[0]["score"], reverse=larger_is_better)
@@ -128,11 +131,11 @@ def search(
         
         # Add the best results to the list and divide the branches
         new_queue = []
-        for result, branch in combined:
-            results.append(result)
+        for _, branch in combined:
             new_queue.extend(branch.divide())
             
         # Update the queue
         queue = new_queue
-        
-    return sorted(results, key=lambda x: x["score"], reverse=larger_is_better)[0], results, root
+    
+    results = sorted(results, key=lambda x: x["score"], reverse=larger_is_better)
+    return results[0], results, root

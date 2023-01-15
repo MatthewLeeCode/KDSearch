@@ -32,7 +32,7 @@ y_test = test_data.test_labels
 
 hyperparameter_ranges = {
     "learning_rate": [0.00001, 0.0001],
-    "dropout": [0, 0.9]
+    "weight_decay": [0, 0.9]
 }
 
 best_result, results, kdtree = kdsearch.search(
@@ -42,21 +42,20 @@ best_result, results, kdtree = kdsearch.search(
     hyperparameter_ranges=hyperparameter_ranges,
     num_best_branches=1,
     n_splits=1,
-    depth=3,
+    depth=5,
     seed=0
 )
 
-coords = kdtree.get_tree_hyperparameters()
-bboxs = kdtree.get_tree_bbox()
+#coords = kdtree.get_tree_hyperparameters()
+#bboxs = kdtree.get_tree_bbox()
 
-# Save the best result  
+# Save the best result
 with open("data/results/best_result.json", "w") as f:
     json.dump(best_result, f)
 
 # Save results
 with open("data/results/coords.json", "w") as f:
-    json.dump(coords, f)
+    json.dump(results, f)
 
-with open("data/results/bboxs.json", "w") as f:
-    json.dump(bboxs, f)
-
+#with open("data/results/bboxs.json", "w") as f:
+    #json.dump(bboxs, f)

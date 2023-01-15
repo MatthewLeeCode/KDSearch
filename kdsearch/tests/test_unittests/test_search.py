@@ -48,16 +48,17 @@ def test_search(mock_train_cross_validator):
         # in train_cross_validator which is mocked
         return
     
-    results = search(
+    best_result, results, root = search(
         X=X, 
         y=y,
         model_func=model_func,
         hyperparameter_ranges=hyperparameter_ranges,
         num_best_branches=4,
         larger_is_better=True,
-        depth=3)[1]
-    assert len(results) == 9
+        depth=3)
+    assert len(results) == 17
     assert mock_train_cross_validator.call_count == 17  # 4 duplicates
+    assert best_result == results[0]
 
 
 @patch("kdsearch.search.train_cross_validator", return_value=0.5)
@@ -85,5 +86,5 @@ def test_search_seed(mock_train_cross_validator):
         num_best_branches=4,
         larger_is_better=True,
         depth=3)[1]
-    assert len(results) == 9
+    assert len(results) == 17
     assert mock_train_cross_validator.call_count == 17  # 4 duplicates
