@@ -1,4 +1,5 @@
 # KDTree-based Hyperparameter Optimization
+<While functional, this is still an experimental work in progress>
 This project implements a k-dimensional binary search tree (KDTree) algorithm for hyperparameter optimization. The algorithm is designed to search for the optimal hyperparameters for a model by dividing the hyperparameter space into smaller and smaller regions until the best hyperparameters are found.
 
 The main components of the project are the KDTree class, the train_cross_validator function, the remove_duplicates function, and the search function.
